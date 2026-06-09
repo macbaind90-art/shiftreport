@@ -84,6 +84,7 @@ try {
   const { ipcRenderer } = require('electron');
   window.PWADCDesktop = {
     createEmailWithPdf: (payload) => ipcRenderer.invoke('pwadc:create-email-with-pdf', payload),
+    savePdfToReports: (payload) => ipcRenderer.invoke('pwadc:save-pdf-to-reports', payload),
     getDataLocations: () => ipcRenderer.invoke('pwadc:get-data-locations'),
     isDesktopApp: true
   };

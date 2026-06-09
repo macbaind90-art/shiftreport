@@ -37,15 +37,23 @@ function psEscape(value) {
   return String(value ?? '').replace(/'/g, "''");
 }
 
+
+function savePdfToReports(payload) {
+  const reportsDir = getReportsDir();
+  const fileName = sanitizeFileName(payload.fileName || 'shift-report.pdf');
+  const pdfPath = path.join(reportsDir, fileName);
+  const pdfBytes = Buffer.from(String(payload.pdfBase64 || ''), 'base64');
+  if (!pdfBytes.length) throw new Error('PDF was empty.');
+  fs.writeFileSync(pdfPath, pdfBytes);
+  return { ok: true, pdfPath, reportsDir, fileName };
+}
+
 function createOutlookDraftWithAttachment(payload) {
   return new Promise((resolve, reject) => {
     try {
-      const reportsDir = getReportsDir();
-      const fileName = sanitizeFileName(payload.fileName || 'shift-report.pdf');
-      const pdfPath = path.join(reportsDir, fileName);
-      const pdfBytes = Buffer.from(String(payload.pdfBase64 || ''), 'base64');
-      if (!pdfBytes.length) throw new Error('PDF was empty.');
-      fs.writeFileSync(pdfPath, pdfBytes);
+      const saved = savePdfToReports(payload);
+      const reportsDir = saved.reportsDir;
+      const pdfPath = saved.pdfPath;
 
       const jsonPath = path.join(os.tmpdir(), 'pwadc-shift-report-mail-' + Date.now() + '.json');
       fs.writeFileSync(jsonPath, JSON.stringify({
@@ -61,6 +69,12 @@ $ErrorActionPreference = 'Stop'
 $data = Get-Content -LiteralPath '${psEscape(jsonPath)}' -Raw | ConvertFrom-Json
 $outlook = New-Object -ComObject Outlook.Application
 $mail = $outlook.CreateItem(0)
+$preferred = '${psEscape(PREFERRED_OUTLOOK_ACCOUNT)}'
+if ($preferred) {
+  foreach ($acct in $outlook.Session.Accounts) {
+    if ([string]$acct.SmtpAddress -ieq $preferred) { $mail.SendUsingAccount = $acct; break }
+  }
+}
 $mail.To = [string]$data.to
 $mail.CC = [string]$data.cc
 $mail.Subject = [string]$data.subject
@@ -177,6 +191,7 @@ function buildMenu() {
 }
 
 ipcMain.handle('pwadc:create-email-with-pdf', async (_event, payload) => createOutlookDraftWithAttachment(payload));
+ipcMain.handle('pwadc:save-pdf-to-reports', async (_event, payload) => savePdfToReports(payload));
 
 ipcMain.handle('pwadc:get-data-locations', async () => ({ dataDir: getDataDir(), reportsDir: getReportsDir() }));
 

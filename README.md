@@ -45,3 +45,11 @@ The portable EXE will be created in `dist`.
 Workflow path:
 
 `.github/workflows/build-windows.yml`
+
+
+## v4 email behavior
+
+Default send mode is now **Save PDF + Open Email**. This saves the PDF to the shared reports folder, copies the PDF path to the clipboard when possible, then opens the workstation's default mail app. This matches the Outlook/profile Windows already uses correctly.
+
+The **Classic Outlook Attach** button still uses Outlook COM automation and can auto-attach the PDF, but it depends on classic Outlook opening the correct profile. If that workstation opens the wrong Outlook instance, use the default send mode.
+
