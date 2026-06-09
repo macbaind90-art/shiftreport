@@ -1,6 +1,6 @@
 {
   "name": "pwadc-security-shift-report",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "PWADC Security Shift Report desktop app",
   "main": "main.js",
   "author": "PWADC Security",

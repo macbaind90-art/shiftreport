@@ -24,7 +24,7 @@ function ensureDataDir() {
 }
 
 function getReportsDir() {
-  const dir = path.join(getDataDir(), 'reports');
+  const dir = app.getPath('downloads');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -69,12 +69,6 @@ $ErrorActionPreference = 'Stop'
 $data = Get-Content -LiteralPath '${psEscape(jsonPath)}' -Raw | ConvertFrom-Json
 $outlook = New-Object -ComObject Outlook.Application
 $mail = $outlook.CreateItem(0)
-$preferred = '${psEscape(PREFERRED_OUTLOOK_ACCOUNT)}'
-if ($preferred) {
-  foreach ($acct in $outlook.Session.Accounts) {
-    if ([string]$acct.SmtpAddress -ieq $preferred) { $mail.SendUsingAccount = $acct; break }
-  }
-}
 $mail.To = [string]$data.to
 $mail.CC = [string]$data.cc
 $mail.Subject = [string]$data.subject
@@ -154,7 +148,7 @@ function buildMenu() {
           click: () => shell.openPath(getDataDir())
         },
         {
-          label: 'Open Reports Folder',
+          label: 'Open Downloads Folder',
           click: () => shell.openPath(getReportsDir())
         },
         {
@@ -193,7 +187,7 @@ function buildMenu() {
 ipcMain.handle('pwadc:create-email-with-pdf', async (_event, payload) => createOutlookDraftWithAttachment(payload));
 ipcMain.handle('pwadc:save-pdf-to-reports', async (_event, payload) => savePdfToReports(payload));
 
-ipcMain.handle('pwadc:get-data-locations', async () => ({ dataDir: getDataDir(), reportsDir: getReportsDir() }));
+ipcMain.handle('pwadc:get-data-locations', async () => ({ dataDir: getDataDir(), reportsDir: getReportsDir(), downloadsDir: getReportsDir() }));
 
 app.whenReady().then(() => {
   buildMenu();
