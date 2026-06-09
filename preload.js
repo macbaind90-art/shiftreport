@@ -79,3 +79,14 @@ try {
 } catch (err) {
   console.error('Failed to install file-backed storage:', err);
 }
+
+try {
+  const { ipcRenderer } = require('electron');
+  window.PWADCDesktop = {
+    createEmailWithPdf: (payload) => ipcRenderer.invoke('pwadc:create-email-with-pdf', payload),
+    getDataLocations: () => ipcRenderer.invoke('pwadc:get-data-locations'),
+    isDesktopApp: true
+  };
+} catch (err) {
+  console.error('Failed to expose PWADC desktop helpers:', err);
+}

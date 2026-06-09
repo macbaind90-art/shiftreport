@@ -227,7 +227,7 @@ dialog{border:none;background:transparent;margin:auto;max-width:min(820px,94vw);
 </main>
 
 <dialog id="previewDialog"><div class="modal"><div class="modal-title">Report Preview</div><div id="previewText" class="report-preview"></div><div class="export-note">Use the report ID as the filename. PDF is the preferred attachment format. Word and Excel exports use the same filename automatically.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="downloadPdf()">PDF</button><button class="btn btn-ghost" onclick="downloadDoc()">Word</button><button class="btn btn-ghost" onclick="downloadXls()">Excel</button><button class="btn btn-ghost" onclick="downloadTxt()">TXT</button><button class="btn btn-primary" onclick="document.getElementById('previewDialog').close()">Close</button></div></div></dialog>
-<dialog id="exportDialog"><div class="modal"><div class="modal-title">Review / Export / Send Report</div><div class="export-center"><div><div id="exportPreview" class="email-preview-card" style="max-height:62vh;overflow:auto"></div></div><div class="export-panel"><div class="export-step"><div class="export-step-num">1</div><div><div class="export-step-title">Review</div><div class="export-step-desc">Check the finished report before saving or sending.</div></div></div><div class="export-step"><div class="export-step-num">2</div><div><div class="export-step-title">Export Attachment</div><div class="export-step-desc">Exports use the Report ID as the filename. PDF is preferred for the official folder and email attachment.</div></div></div><div class="export-step"><div class="export-step-num">3</div><div><div class="export-step-title">Send</div><div class="export-step-desc">Opens the routed email draft with only a reminder to attach the saved report and file it correctly.</div></div></div><div class="export-actions-grid"><button class="btn btn-gold" onclick="downloadPdf()">Download PDF</button><button class="btn btn-ghost" onclick="downloadDoc()">Download Word</button><button class="btn btn-ghost" onclick="downloadXls()">Download Excel</button><button class="btn btn-primary" onclick="submitReport()">Open Email Draft</button><button class="btn btn-ghost" onclick="downloadTxt()">Download Text</button><button class="btn btn-danger" onclick="openClearFormDialog()">Clear Form</button></div><div class="export-note" style="margin-top:12px">Email body is intentionally short. Attach the saved report named with the Report ID and save a copy in the correct folder.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="document.getElementById('exportDialog').close()">Close</button></div></div></div></div></dialog>
+<dialog id="exportDialog"><div class="modal"><div class="modal-title">Review / Export / Send Report</div><div class="export-center"><div><div id="exportPreview" class="email-preview-card" style="max-height:62vh;overflow:auto"></div></div><div class="export-panel"><div class="export-step"><div class="export-step-num">1</div><div><div class="export-step-title">Review</div><div class="export-step-desc">Check the finished report before saving or sending.</div></div></div><div class="export-step"><div class="export-step-num">2</div><div><div class="export-step-title">Export Attachment</div><div class="export-step-desc">Exports use the Report ID as the filename. PDF is preferred for the official folder and email attachment.</div></div></div><div class="export-step"><div class="export-step-num">3</div><div><div class="export-step-title">Send</div><div class="export-step-desc">Creates the routed Outlook draft with the completed PDF already attached when running as the desktop EXE.</div></div></div><div class="export-actions-grid"><button class="btn btn-gold" onclick="downloadPdf()">Download PDF</button><button class="btn btn-ghost" onclick="downloadDoc()">Download Word</button><button class="btn btn-ghost" onclick="downloadXls()">Download Excel</button><button class="btn btn-primary" onclick="submitReport()">Create Email + Attach PDF</button><button class="btn btn-ghost" onclick="downloadTxt()">Download Text</button><button class="btn btn-danger" onclick="openClearFormDialog()">Clear Form</button></div><div class="export-note" style="margin-top:12px">Email body is intentionally short. The desktop EXE will attach the PDF automatically; still confirm the copy is saved in the correct folder.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="document.getElementById('exportDialog').close()">Close</button></div></div></div></div></dialog>
 
 <dialog id="clearDialog"><div class="modal"><div class="modal-title">Clear Current Report?</div><div class="export-note" style="border-left-color:var(--danger);color:var(--text-dim)"><strong style="color:var(--text)">This clears only the current shift report form.</strong><br><br>It will reset shift details, roster rows, notes, incidents, notifications, pass-down, and vehicle fields. It will keep the saved People list and app settings intact.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="document.getElementById('clearDialog').close()">Cancel</button><button class="btn btn-danger" onclick="confirmClearForm()">Clear Form</button></div></div></dialog>
 <dialog id="peopleDialog"><div class="modal"><div class="modal-title">Manage People</div><div class="people-toolbar"><div class="person-status" id="peopleStatus">Active personnel shown in roster dropdowns. Supervisors also appear in supervisor dropdowns.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="exportPeopleJson()">Export People</button><label class="btn btn-ghost btn-sm" style="cursor:pointer">Import People<input type="file" accept=".json" onchange="importPeopleJson(event)" style="display:none"></label><button class="btn btn-gold btn-sm" onclick="addPersonRow()">+ Add Person</button></div></div><div class="table-wrap"><table class="person-table"><thead><tr><th>Name</th><th>Rank / Role</th><th>Active</th><th>Promote</th><th>Remove</th></tr></thead><tbody id="peopleBody"></tbody></table></div><div class="export-note"><strong>People storage:</strong> this list is saved in this computer/browser. When this app file is rebuilt with a newer baked-in People version, it automatically replaces the browser's saved People list. Export People / Import People is still available for manual roster transfer. Remove hides the person from future dropdowns but does not erase old report rows already saved.</div><div class="modal-actions"><button class="btn btn-primary" onclick="closePersonnelManager()">Done</button></div></div></dialog>
@@ -820,10 +820,36 @@ Report ID / File Name: ${fileName}
 Shift: ${d.shift||'N/A'} Shift (${shiftLabelFor(d.shift)||`${militaryTime(d.startTime)}-${militaryTime(d.endTime)}`})
 Date: ${d.reportDate||'N/A'}`;
 }
-function submitReport(){
-  saveDraft(); const problems=validateReport(); if(problems.length && !confirm('The report has missing items:\n\n'+problems.join('\n')+'\n\nContinue and open email anyway?')) return;
+function pdfStringToBase64(pdf){
+  let binary='';
+  for(let i=0;i<pdf.length;i++) binary += String.fromCharCode(pdf.charCodeAt(i) & 255);
+  return btoa(binary);
+}
+async function submitReport(){
+  saveDraft(); const problems=validateReport(); if(problems.length && !confirm('The report has missing items:\n\n'+problems.join('\n')+'\n\nContinue and create email anyway?')) return;
   const d=getState(); const cc=[JOHN_EMAIL].concat(NEXT_SHIFT_CC[d.shift]||[]); const subject=`${exportFileBaseName()} - Security Shift Report`; const body=buildEmailReminder(d);
   document.getElementById('statEmail').textContent='Email';
+
+  if(window.PWADCDesktop && window.PWADCDesktop.createEmailWithPdf){
+    try{
+      const fileName=exportFileBaseName()+'.pdf';
+      const pdf=buildPdfDocument();
+      const result=await window.PWADCDesktop.createEmailWithPdf({
+        to: TO_EMAIL,
+        cc: cc.join(';'),
+        subject,
+        body,
+        fileName,
+        pdfBase64: pdfStringToBase64(pdf)
+      });
+      toast('Outlook draft created with PDF attached. PDF saved to: '+(result && result.reportsDir ? result.reportsDir : 'reports folder'));
+      return;
+    }catch(err){
+      console.error(err);
+      alert('Could not create the Outlook draft with attachment. The app will fall back to a normal email draft.\n\nReason: '+(err && err.message ? err.message : err));
+    }
+  }
+
   const mailto='mailto:'+encodeURIComponent(TO_EMAIL)+'?cc='+encodeURIComponent(cc.join(','))+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
   toast('Opening email draft. Attach the saved report before sending.'); window.location.href=mailto;
 }

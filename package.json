@@ -1,6 +1,6 @@
 {
   "name": "pwadc-security-shift-report",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "PWADC Security Shift Report desktop app",
   "main": "main.js",
   "author": "PWADC Security",
@@ -18,7 +18,7 @@
   "build": {
     "appId": "com.pwadc.security.shiftreport",
     "productName": "PWADC Security Shift Report",
-    "copyright": "Copyright © 2026 PWADC Security",
+    "copyright": "Copyright \u00a9 2026 PWADC Security",
     "directories": {
       "output": "dist"
     },
@@ -31,7 +31,9 @@
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "artifactName": "PWADC-Security-Shift-Report-${version}.${ext}"

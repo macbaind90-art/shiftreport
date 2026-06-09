@@ -1,6 +1,8 @@
-const { app, BrowserWindow, shell, dialog, Menu } = require('electron');
+const { app, BrowserWindow, shell, dialog, Menu, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const { spawn } = require('child_process');
 
 const APP_NAME = 'PWADC Security Shift Report';
 const SHARED_DATA_DIR = '\\\\pig-fs\\Security\\Supervisors\\data';
@@ -19,6 +21,69 @@ function getDataDir() {
 
 function ensureDataDir() {
   return getDataDir();
+}
+
+function getReportsDir() {
+  const dir = path.join(getDataDir(), 'reports');
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function sanitizeFileName(name) {
+  return String(name || 'shift-report.pdf').replace(/[<>:"/\\|?*\x00-\x1F]/g, '_');
+}
+
+function psEscape(value) {
+  return String(value ?? '').replace(/'/g, "''");
+}
+
+function createOutlookDraftWithAttachment(payload) {
+  return new Promise((resolve, reject) => {
+    try {
+      const reportsDir = getReportsDir();
+      const fileName = sanitizeFileName(payload.fileName || 'shift-report.pdf');
+      const pdfPath = path.join(reportsDir, fileName);
+      const pdfBytes = Buffer.from(String(payload.pdfBase64 || ''), 'base64');
+      if (!pdfBytes.length) throw new Error('PDF was empty.');
+      fs.writeFileSync(pdfPath, pdfBytes);
+
+      const jsonPath = path.join(os.tmpdir(), 'pwadc-shift-report-mail-' + Date.now() + '.json');
+      fs.writeFileSync(jsonPath, JSON.stringify({
+        to: payload.to || '',
+        cc: payload.cc || '',
+        subject: payload.subject || '',
+        body: payload.body || '',
+        attachment: pdfPath
+      }, null, 2), 'utf8');
+
+      const ps = `
+$ErrorActionPreference = 'Stop'
+$data = Get-Content -LiteralPath '${psEscape(jsonPath)}' -Raw | ConvertFrom-Json
+$outlook = New-Object -ComObject Outlook.Application
+$mail = $outlook.CreateItem(0)
+$mail.To = [string]$data.to
+$mail.CC = [string]$data.cc
+$mail.Subject = [string]$data.subject
+$mail.Body = [string]$data.body
+[void]$mail.Attachments.Add([string]$data.attachment)
+$mail.Display()
+Remove-Item -LiteralPath '${psEscape(jsonPath)}' -Force -ErrorAction SilentlyContinue
+`;
+
+      const child = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', ps], {
+        windowsHide: true
+      });
+      let stderr = '';
+      child.stderr.on('data', d => stderr += d.toString());
+      child.on('error', reject);
+      child.on('close', code => {
+        if (code === 0) resolve({ ok: true, pdfPath, reportsDir });
+        else reject(new Error(stderr || 'Outlook automation failed with exit code ' + code));
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
 function createWindow() {
@@ -75,6 +140,10 @@ function buildMenu() {
           click: () => shell.openPath(getDataDir())
         },
         {
+          label: 'Open Reports Folder',
+          click: () => shell.openPath(getReportsDir())
+        },
+        {
           label: 'Show Storage File Location',
           click: () => {
             const file = path.join(getDataDir(), 'pwadc-shift-report-storage.json');
@@ -106,6 +175,10 @@ function buildMenu() {
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
+
+ipcMain.handle('pwadc:create-email-with-pdf', async (_event, payload) => createOutlookDraftWithAttachment(payload));
+
+ipcMain.handle('pwadc:get-data-locations', async () => ({ dataDir: getDataDir(), reportsDir: getReportsDir() }));
 
 app.whenReady().then(() => {
   buildMenu();
