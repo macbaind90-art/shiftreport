@@ -1,0 +1,43 @@
+{
+  "name": "pwadc-security-shift-report",
+  "version": "1.0.1",
+  "description": "PWADC Security Shift Report desktop app",
+  "main": "main.js",
+  "author": "PWADC Security",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win portable --x64",
+    "build:dir": "electron-builder --dir --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.pwadc.security.shiftreport",
+    "productName": "PWADC Security Shift Report",
+    "copyright": "Copyright © 2026 PWADC Security",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "PWADC-Security-Shift-Report-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "PWADC-Security-Shift-Report-${version}.${ext}"
+    }
+  }
+}

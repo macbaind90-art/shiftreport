@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PWADC Security Shift Report</title>
+<style>
+:root {
+  --red:#C0272D; --red-dark:#8f1c21; --red-light:#e8383e;
+  --gold:#C6B273; --gold-light:#d9c98a;
+  --charcoal:#1e2330; --surface:#28303f; --surface2:#313b4d; --surface3:#3d4a5e;
+  --border:#404d62; --text:#eef0f4; --text-muted:#8a96a8; --text-dim:#c4cad5;
+  --green:#4caf6e; --blue:#4a90d9; --orange:#e08a2f; --danger:#e05555;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial, Helvetica, sans-serif;background:var(--charcoal);color:var(--text);min-height:100vh;font-size:14px;line-height:1.4}
+header{background:var(--surface);border-bottom:3px solid var(--red);padding:0 20px;display:flex;align-items:center;gap:18px;min-height:62px;position:sticky;top:0;z-index:100;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.logo-text{font-family:Arial Narrow, Arial, sans-serif;font-weight:900;font-size:22px;color:var(--gold);letter-spacing:1.5px;line-height:1}
+.logo-sub{font-family:Arial Narrow, Arial, sans-serif;font-size:11px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.divider-v{width:1px;height:34px;background:var(--border)}
+.header-title{font-family:Arial Narrow, Arial, sans-serif;color:var(--text);font-weight:900;text-transform:uppercase;letter-spacing:1px;font-size:18px}
+.header-actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{font-family:Arial Narrow, Arial, sans-serif;font-weight:800;font-size:13px;letter-spacing:.8px;text-transform:uppercase;padding:9px 14px;border-radius:4px;border:none;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn-primary{background:var(--red);color:#fff}.btn-primary:hover{background:var(--red-light)}
+.btn-gold{background:var(--gold);color:var(--charcoal)}.btn-gold:hover{background:var(--gold-light)}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--text-muted);background:var(--surface2)}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}.btn-danger:hover{background:var(--danger);color:white}
+.btn-sm{padding:5px 9px;font-size:11px}
+main{max-width:1280px;margin:0 auto;padding:24px}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:16px;flex-wrap:wrap}
+.page-title{font-family:Arial Narrow, Arial, sans-serif;font-weight:900;font-size:30px;color:var(--gold);letter-spacing:1px;text-transform:uppercase}
+.page-subtitle{font-size:12px;color:var(--text-muted);margin-top:3px;letter-spacing:.3px}
+.grid{display:grid;gap:14px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.card-head{font-family:Arial Narrow, Arial, sans-serif;background:var(--surface2);color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:1px;font-size:15px;padding:10px 12px;border-left:4px solid var(--red);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card-body{padding:14px}
+.section-num{color:var(--red);margin-right:6px}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.form-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:800}
+.form-input, textarea, select{background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:9px 10px;font-family:Arial, Helvetica, sans-serif;font-size:13px;outline:none;width:100%}
+.form-input:focus, textarea:focus, select:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(198,178,115,.12)}
+textarea{min-height:112px;resize:vertical}.tall{min-height:160px}.short{min-height:74px}
+select option{background:var(--surface2);color:var(--text)}
+.inline-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.check-row{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);padding:9px;border-radius:4px;color:var(--text-dim)}
+.check-row input{accent-color:var(--red);width:16px;height:16px}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}thead{background:var(--surface2)}
+th{font-family:Arial Narrow, Arial, sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);padding:10px 8px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}tbody tr:hover{background:var(--surface2)}
+.roster-name{min-width:230px}.post-cell{min-width:155px}.hours-cell{min-width:120px}.attendance-cell{min-width:130px}.notes-cell{min-width:240px}.actions-cell{width:70px}
+.pill{display:inline-block;border-radius:3px;background:var(--surface3);color:var(--text-dim);font-family:Arial Narrow, Arial, sans-serif;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;font-size:11px}
+.info-note{background:var(--surface2);border-left:3px solid var(--gold);border-radius:4px;padding:11px 13px;font-size:12px;color:var(--text-muted);margin-bottom:14px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 18px}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:13px;position:relative;overflow:hidden}.stat-card:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--red)}.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}.stat-value{font-family:Arial Narrow, Arial, sans-serif;font-size:25px;font-weight:900;color:var(--text);margin-top:4px}
+.footer-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px}
+.toast{position:fixed;right:22px;bottom:22px;z-index:500;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--green);padding:12px 16px;border-radius:4px;color:var(--text);box-shadow:0 12px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;max-width:360px}.toast.show{opacity:1;transform:translateY(0)}.toast.error{border-left-color:var(--red)}
+dialog{border:none;background:transparent;margin:auto;max-width:min(820px,94vw);width:820px}dialog::backdrop{background:rgba(0,0,0,.72)}.modal{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--red);border-radius:6px;padding:22px;max-height:88vh;overflow:auto}.modal-title{font-family:Arial Narrow, Arial, sans-serif;font-size:22px;font-weight:900;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}.report-preview{white-space:pre-wrap;background:#151a24;border:1px solid var(--border);border-radius:5px;padding:14px;max-height:420px;overflow:auto;color:var(--text-dim);font-family:Consolas, monospace;font-size:12px}
+.export-center{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+.export-panel{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:14px}
+.export-step{display:flex;gap:10px;align-items:flex-start;padding:10px;border-bottom:1px solid var(--border)}
+.export-step:last-child{border-bottom:none}
+.export-step-num{width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:Arial Narrow,Arial,sans-serif;font-weight:900;font-size:12px;flex:0 0 auto}
+.export-step-title{font-family:Arial Narrow,Arial,sans-serif;font-weight:900;text-transform:uppercase;color:var(--gold);letter-spacing:.7px;font-size:13px}
+.export-step-desc{font-size:12px;color:var(--text-muted);margin-top:2px}
+.export-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.export-actions-grid .btn{width:100%;padding:12px 10px}
+.people-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px}
+.person-table td,.person-table th{font-size:12px}
+.person-table input,.person-table select{padding:7px 8px;font-size:12px}
+.person-status{font-size:11px;color:var(--text-muted);margin-top:6px}
+@media(max-width:900px){.export-center{grid-template-columns:1fr}.export-actions-grid{grid-template-columns:1fr}}
+
+.hide{display:none!important}
+@media(max-width:820px){header{align-items:flex-start;padding:12px 14px;gap:10px}.divider-v{display:none}.header-actions{width:100%;margin-left:0}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}main{padding:14px}.page-title{font-size:24px}.btn{padding:8px 10px}}
+@media print{@page{size:portrait;margin:.35in}:root{--charcoal:#fff;--surface:#fff;--surface2:#f2f4f7;--surface3:#e3e7ed;--border:#9aa3b2;--text:#111827;--text-muted:#4b5563;--text-dim:#1f2937}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{background:#fff!important;color:#111827;font-size:11px}header,.footer-actions,.btn,.actions-cell,.toast,dialog{display:none!important}main{padding:0;max-width:none}.card{break-inside:avoid;margin-bottom:8px}.card-head{background:#e5e7eb!important;color:#111827!important;border-left-color:#111827}.form-input,textarea,select{border:1px solid #9aa3b2!important;background:#fff!important;color:#111827!important;padding:5px;min-height:auto}textarea{height:auto;min-height:60px}th{background:#e5e7eb!important;color:#111827!important}td,th{padding:4px;border-color:#c8ced8}.page-title{color:#111827;font-size:22px}.page-subtitle,.form-label{color:#4b5563}.grid{gap:8px}.card-body{padding:8px}}
+
+.email-preview-card{background:#fff;color:#111827;border-radius:6px;padding:18px;font-family:Arial,Helvetica,sans-serif;line-height:1.35}
+.email-preview-card .email-head{border-bottom:3px solid #C0272D;padding-bottom:10px;margin-bottom:12px}
+.email-preview-card h2{margin:0;color:#1e2330;font-size:20px;letter-spacing:.5px}
+.email-preview-card .email-sub{font-size:12px;color:#4b5563;margin-top:3px}
+.email-preview-card .email-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.email-preview-card .email-box{border:1px solid #d1d5db;border-left:4px solid #C0272D;padding:8px;background:#f9fafb}
+.email-preview-card .email-label{font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:700}
+.email-preview-card .email-value{font-size:13px;color:#111827;font-weight:700;margin-top:3px}
+.email-preview-card .email-section{margin-top:14px}
+.email-preview-card .email-section-title{font-size:12px;text-transform:uppercase;color:#8f1c21;font-weight:800;border-bottom:1px solid #d1d5db;padding-bottom:4px;margin-bottom:6px}
+.email-preview-card table{width:100%;border-collapse:collapse;font-size:12px}
+.email-preview-card th{background:#1e2330;color:#C6B273;text-align:left;padding:6px;border:1px solid #374151}
+.email-preview-card td{padding:6px;border:1px solid #d1d5db;vertical-align:top}
+.email-preview-card .muted{color:#6b7280}
+@media(max-width:800px){.email-preview-card .email-grid{grid-template-columns:1fr 1fr}}
+
+.export-note{background:#1b2230;border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:6px;padding:10px 12px;margin-top:10px;color:var(--text-muted);font-size:12px;line-height:1.45}
+@media print{
+  header,.footer-actions,#toast,.modal-actions,dialog{display:none!important}
+  body{background:#fff!important;color:#111!important}
+  main{max-width:none;padding:0}
+  .card,.stat-card{break-inside:avoid;border-color:#9ca3af!important;background:#fff!important;color:#111!important}
+  .card-head{background:#1e2330!important;color:#C6B273!important}
+  .form-input,textarea,select{background:#fff!important;color:#111!important;border-color:#9ca3af!important}
+}
+
+.section-mini-title{font-family:Arial Narrow,Arial,sans-serif;font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);margin:4px 0 8px;border-left:4px solid var(--red);padding-left:8px}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-text">PWADC</div><div class="logo-sub">Security Department</div></div>
+  <div class="divider-v"></div>
+  <div class="header-title">Shift Report</div>
+  <div class="header-actions">
+    <span id="saveIndicator" style="font-size:11px;color:var(--text-muted);letter-spacing:.4px"></span>
+    <button class="btn btn-ghost" onclick="openPersonnelManager()">People</button>
+    <button class="btn btn-danger" onclick="openClearFormDialog()">Clear Form</button>
+    <button class="btn btn-ghost" onclick="window.print()">Print Draft</button>
+    <button class="btn btn-ghost" onclick="exportJson()">Backup</button>
+    <label class="btn btn-ghost" style="cursor:pointer">Restore<input type="file" accept=".json" onchange="importJson(event)" style="display:none"></label>
+    <button class="btn btn-gold" onclick="openExportCenter()">Review / Export / Send</button>
+  </div>
+</header>
+<main>
+  <div class="page-header">
+    <div>
+      <div class="page-title">Security Department Shift Report</div>
+      <div class="page-subtitle">V17 app version · roster shift hours added · radio accountability removed</div>
+    </div>
+    <div class="pill" id="routingPill">Routing: select shift</div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">Report ID</div><div class="stat-value" id="statReportId">NEW</div></div>
+    <div class="stat-card"><div class="stat-label">Shift</div><div class="stat-value" id="statShift">-</div></div>
+    <div class="stat-card"><div class="stat-label">Roster Count</div><div class="stat-value" id="statRoster">0</div></div>
+    <div class="stat-card"><div class="stat-label">Email Status</div><div class="stat-value" id="statEmail">Draft</div></div>
+  </div>
+
+  <section class="card">
+    <div class="card-head"><span><span class="section-num">1.</span>Shift Detail</span></div>
+    <div class="card-body grid grid-4">
+      <div class="form-group"><label class="form-label">Report ID</label><input id="reportId" class="form-input" readonly></div>
+      <div class="form-group"><label class="form-label">Date</label><input id="reportDate" type="date" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Shift</label><select id="shift" onchange="onShiftChange()"></select></div>
+      <div class="form-group"><label class="form-label">Confidentiality</label><input id="confidentiality" class="form-input" value="Internal Use"></div>
+      <div class="form-group"><label class="form-label">Start Time</label><input id="startTime" type="time" class="form-input"></div>
+      <div class="form-group"><label class="form-label">End Time</label><input id="endTime" type="time" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Supervisor</label><select id="supervisor1"></select></div>
+      <div class="form-group"><label class="form-label">Additional Supervisor</label><select id="supervisor2"></select></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="card-head"><span><span class="section-num">2.</span>Officer Roster</span><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="openPersonnelManager()">Manage People</button><button class="btn btn-gold btn-sm" onclick="addRosterRow()">+ Add Officer Row</button></div></div>
+    <div class="card-body">
+      <div class="info-note">Use one row per officer/post. Shift Hours auto-fill from Section 1 unless the post has fixed hours. Gate and W/E Gate use time-specific post options so the correct hours populate without guesswork.</div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Officer</th><th>Post</th><th>Shift Hours</th><th>Attendance</th><th>Notes</th><th class="actions-cell">Actions</th></tr></thead><tbody id="rosterBody"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="card-head"><span><span class="section-num">3.</span>Shift Overview</span></div>
+    <div class="card-body"><label class="form-label">Brief detail of any and all actions taken during shift</label><textarea id="overview" class="tall"></textarea></div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="card-head"><span><span class="section-num">4.</span>Patrol / Safety</span></div>
+    <div class="card-body grid grid-2">
+      <div class="form-group"><label class="form-label">Issues found during patrol?</label><select id="patrolIssues"><option>No</option><option>Yes</option></select></div>
+      <div class="form-group"><label class="form-label">Safety / security concerns found during patrol</label><textarea id="patrolNotes" class="short" placeholder="Attach pictures to the email when applicable."></textarea></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="card-head"><span><span class="section-num">5.</span>Incidents / Events</span></div>
+    <div class="card-body grid grid-2">
+      <div class="form-group"><label class="form-label">Incidents occurred?</label><select id="incidents"><option>No</option><option>Yes</option></select></div>
+      <div class="form-group"><label class="form-label">Event IDs</label><input id="eventIds" class="form-input" placeholder="Example: EVT-1234, EVT-1235"></div>
+      <div class="form-group" style="grid-column:1/-1"><label class="form-label">Incident / event details</label><textarea id="incidentNotes"></textarea></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="card-head"><span><span class="section-num">6.</span>Notifications</span></div>
+    <div class="card-body">
+      <div class="inline-checks">
+        <label class="check-row"><input type="checkbox" id="notifyHr"> Human Resources</label>
+        <label class="check-row"><input type="checkbox" id="notifyAdmin"> Administration</label>
+        <label class="check-row"><input type="checkbox" id="notifyMaint"> Maintenance</label>
+        <label class="check-row"><input type="checkbox" id="notifyTrans"> Transportation</label>
+        <label class="check-row"><input type="checkbox" id="notifyLaw"> Law Enforcement / EMS</label>
+      </div>
+      <div class="grid grid-2" style="margin-top:12px">
+        <div class="form-group"><label class="form-label">Other</label><input id="notifyOther" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Agency / Case #</label><input id="agencyCase" class="form-input"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="card-head"><span><span class="section-num">7.</span>Pass-Down</span></div>
+    <div class="card-body"><textarea id="passdown" class="tall" placeholder="Critical information for the next shift supervisors."></textarea></div>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <div class="card-head"><span><span class="section-num">8.</span>Security Vehicle Information</span></div>
+    <div class="card-body">
+      <div class="info-note">Security car mileage only needs to be entered on the 15th of each month, per the template.</div>
+      <div class="grid grid-3">
+        <div class="form-group"><label class="form-label">Security Car Mileage</label><input id="carMileage" class="form-input" inputmode="numeric"></div>
+        <div class="form-group"><label class="form-label">Fuel Level</label><select id="fuelLevel"><option>Full</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Empty</option></select></div>
+        <div class="form-group"><label class="form-label">Security Car Damage</label><input id="carDamage" class="form-input" value="None"></div>
+        <div class="form-group"><label class="form-label">Security Cart Battery Level</label><select id="cartBattery"><option>Full</option><option>75%</option><option>50%</option><option>25%</option><option>Needs Charging</option></select></div>
+        <div class="form-group"><label class="form-label">Maintenance Needed</label><input id="maintenanceNeeded" class="form-input" value="None"></div>
+        <div class="form-group"><label class="form-label">Security Cart Damage</label><input id="cartDamage" class="form-input" value="None"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-actions">
+    <div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-danger" onclick="openClearFormDialog()">Clear Form</button>
+      <button class="btn btn-ghost" onclick="openPersonnelManager()">Manage People</button>
+      <button class="btn btn-primary" onclick="openExportCenter()">Review / Export / Send</button>
+    </div>
+  </div>
+</main>
+
+<dialog id="previewDialog"><div class="modal"><div class="modal-title">Report Preview</div><div id="previewText" class="report-preview"></div><div class="export-note">Use the report ID as the filename. PDF is the preferred attachment format. Word and Excel exports use the same filename automatically.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="downloadPdf()">PDF</button><button class="btn btn-ghost" onclick="downloadDoc()">Word</button><button class="btn btn-ghost" onclick="downloadXls()">Excel</button><button class="btn btn-ghost" onclick="downloadTxt()">TXT</button><button class="btn btn-primary" onclick="document.getElementById('previewDialog').close()">Close</button></div></div></dialog>
+<dialog id="exportDialog"><div class="modal"><div class="modal-title">Review / Export / Send Report</div><div class="export-center"><div><div id="exportPreview" class="email-preview-card" style="max-height:62vh;overflow:auto"></div></div><div class="export-panel"><div class="export-step"><div class="export-step-num">1</div><div><div class="export-step-title">Review</div><div class="export-step-desc">Check the finished report before saving or sending.</div></div></div><div class="export-step"><div class="export-step-num">2</div><div><div class="export-step-title">Export Attachment</div><div class="export-step-desc">Exports use the Report ID as the filename. PDF is preferred for the official folder and email attachment.</div></div></div><div class="export-step"><div class="export-step-num">3</div><div><div class="export-step-title">Send</div><div class="export-step-desc">Opens the routed email draft with only a reminder to attach the saved report and file it correctly.</div></div></div><div class="export-actions-grid"><button class="btn btn-gold" onclick="downloadPdf()">Download PDF</button><button class="btn btn-ghost" onclick="downloadDoc()">Download Word</button><button class="btn btn-ghost" onclick="downloadXls()">Download Excel</button><button class="btn btn-primary" onclick="submitReport()">Open Email Draft</button><button class="btn btn-ghost" onclick="downloadTxt()">Download Text</button><button class="btn btn-danger" onclick="openClearFormDialog()">Clear Form</button></div><div class="export-note" style="margin-top:12px">Email body is intentionally short. Attach the saved report named with the Report ID and save a copy in the correct folder.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="document.getElementById('exportDialog').close()">Close</button></div></div></div></div></dialog>
+
+<dialog id="clearDialog"><div class="modal"><div class="modal-title">Clear Current Report?</div><div class="export-note" style="border-left-color:var(--danger);color:var(--text-dim)"><strong style="color:var(--text)">This clears only the current shift report form.</strong><br><br>It will reset shift details, roster rows, notes, incidents, notifications, pass-down, and vehicle fields. It will keep the saved People list and app settings intact.</div><div class="modal-actions"><button class="btn btn-ghost" onclick="document.getElementById('clearDialog').close()">Cancel</button><button class="btn btn-danger" onclick="confirmClearForm()">Clear Form</button></div></div></dialog>
+<dialog id="peopleDialog"><div class="modal"><div class="modal-title">Manage People</div><div class="people-toolbar"><div class="person-status" id="peopleStatus">Active personnel shown in roster dropdowns. Supervisors also appear in supervisor dropdowns.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="exportPeopleJson()">Export People</button><label class="btn btn-ghost btn-sm" style="cursor:pointer">Import People<input type="file" accept=".json" onchange="importPeopleJson(event)" style="display:none"></label><button class="btn btn-gold btn-sm" onclick="addPersonRow()">+ Add Person</button></div></div><div class="table-wrap"><table class="person-table"><thead><tr><th>Name</th><th>Rank / Role</th><th>Active</th><th>Promote</th><th>Remove</th></tr></thead><tbody id="peopleBody"></tbody></table></div><div class="export-note"><strong>People storage:</strong> this list is saved in this computer/browser. When this app file is rebuilt with a newer baked-in People version, it automatically replaces the browser's saved People list. Export People / Import People is still available for manual roster transfer. Remove hides the person from future dropdowns but does not erase old report rows already saved.</div><div class="modal-actions"><button class="btn btn-primary" onclick="closePersonnelManager()">Done</button></div></div></dialog>
+<div id="toast" class="toast"></div>
+
+<script>
+const APP_KEY = 'pwadc-security-shift-report-v1';
+const PEOPLE_KEY = 'pwadc-security-shift-report-people-v1';
+const PEOPLE_META_KEY = 'pwadc-security-shift-report-people-meta-v1';
+const BAKED_PEOPLE_VERSION = '2026-06-09-v13';
+const TO_EMAIL = 'dmacbain@pwadc.com';
+const JOHN_EMAIL = 'jfaure@pwadc.com';
+const NEXT_SHIFT_CC = {
+  '1st': ['cferguson@pwadc.com','lparker@pwadc.com'],
+  '2nd': ['rsummerhill@pwadc.com','banderson@pwadc.com'],
+  '3rd': ['jbrewer@pwadc.com','daiken@pwadc.com']
+};
+const SHIFT_OPTIONS = ['1st','2nd','3rd'];
+const SHIFT_TIMES = {
+  '1st': {start:'08:00', end:'16:00', label:'0800-1600'},
+  '2nd': {start:'16:00', end:'00:00', label:'1600-0000'},
+  '3rd': {start:'00:00', end:'08:00', label:'0000-0800'}
+};
+const ATTENDANCE_OPTIONS = ['On-Time','Late','Absent','Sick','Vacation','Training'];
+const POST_OPTIONS = ['BASE','Grocery','Crosswalk','Gate 0400-1200','Gate 1200-2000','Gate 2000-0400','W/E Gate 0400-1600','W/E Gate 1600-0400','Patrol','Response','Floater','Reception','Other'];
+const RANK_OPTIONS = ['Security Trainee','Security Officer','Senior Security Officer','Lead Security Officer','Security Supervisor','Security Manager','Receptionist','APS','ONIN','Other'];
+const DEFAULT_PEOPLE = [
+  {name:'Abernathy, Davetta', rank:'Security Trainee', active:true},
+  {name:'Aiken, Don', rank:'Security Supervisor', active:true},
+  {name:'Alvarez, Raina', rank:'Security Trainee', active:true},
+  {name:'Anderson, Shaun', rank:'Security Supervisor', active:true},
+  {name:'Bennett, Jasmine', rank:'Security Officer', active:true},
+  {name:'Bennett, Zachary', rank:'Security Officer', active:true},
+  {name:'Birdsong, Tiffany', rank:'Lead Security Officer', active:true},
+  {name:'Brewer, Jazmine', rank:'Security Supervisor', active:true},
+  {name:'Cave, Jalisa', rank:'Lead Security Officer', active:true},
+  {name:'Cleveland, Kenyetta', rank:'Security Trainee', active:true},
+  {name:'De La Torre, Nelli', rank:'Receptionist', active:true},
+  {name:'Ferguson, Matt', rank:'Security Supervisor', active:true},
+  {name:'Hightower, Kendrick', rank:'APS', active:true},
+  {name:'Howard, Tamika', rank:'Security Trainee', active:true},
+  {name:'Jones, Kaylan', rank:'Security Officer', active:true},
+  {name:'King, Faith', rank:'Security Officer', active:true},
+  {name:'Lancaster, Kettrin', rank:'Security Officer', active:true},
+  {name:'Macbain, David', rank:'Security Manager', active:true},
+  {name:'Mack, Danielle', rank:'Lead Security Officer', active:true},
+  {name:'Mack, Gilbert', rank:'Senior Security Officer', active:true},
+  {name:'Nelson, Addison', rank:'Senior Security Officer', active:true},
+  {name:'Parker, Lacey', rank:'Security Supervisor', active:true},
+  {name:'Paul, Danillo', rank:'Senior Security Officer', active:true},
+  {name:'Perry, Elizabeth', rank:'Senior Security Officer', active:true},
+  {name:'Reese, Javontae', rank:'Senior Security Officer', active:true},
+  {name:'Smathers, Raymond', rank:'Lead Security Officer', active:true},
+  {name:'Small, Kendarius', rank:'ONIN', active:true},
+  {name:'Summerhill, Rickey', rank:'Security Supervisor', active:true},
+  {name:'Westbrook, Sharon', rank:'Security Officer', active:true},
+  {name:'Williams, Kyesha', rank:'Senior Security Officer', active:true},
+  {name:'Wilson, Damyn', rank:'Security Officer', active:true}
+];
+let people = [];
+const FIELDS = ['reportId','reportDate','shift','confidentiality','startTime','endTime','supervisor1','supervisor2','overview','patrolIssues','patrolNotes','incidents','eventIds','incidentNotes','notifyHr','notifyAdmin','notifyMaint','notifyTrans','notifyLaw','notifyOther','agencyCase','passdown','carMileage','fuelLevel','carDamage','cartBattery','maintenanceNeeded','cartDamage'];
+let roster = [];
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function normalizeShiftForId(shift){
+  const s = String(shift||'SHIFT').trim().toLowerCase();
+  if(s.startsWith('1')) return '1';
+  if(s.startsWith('2')) return '2';
+  if(s.startsWith('3')) return '3';
+  return String(shift||'SHIFT').trim().replace(/\s+/g,'').toUpperCase();
+}
+function reportIdFor(date, shift){ const safe=(date||todayISO()); return 'SEC-PWADC-' + safe + '-' + normalizeShiftForId(shift); }
+function refreshReportId(){ const el=document.getElementById('reportId'); if(el) el.value=reportIdFor(document.getElementById('reportDate').value, document.getElementById('shift').value); }
+function shiftLabelFor(shift){ return (SHIFT_TIMES[shift] && SHIFT_TIMES[shift].label) || ''; }
+function militaryTime(value){ return String(value||'').replace(':','') || 'N/A'; }
+function normalizePostName(post){
+  const p=String(post||'').trim();
+  if(/^perishable$/i.test(p)) return 'Crosswalk';
+  return p;
+}
+function postShiftHours(post){
+  const p=normalizePostName(post).toLowerCase();
+  if(!p) return shiftLabelFor(document.getElementById('shift')?.value) || '';
+  if(p === 'grocery') return '0600-1400';
+  if(p === 'crosswalk') return '0500-1300';
+  if(p.includes('0400-1200')) return '0400-1200';
+  if(p.includes('1200-2000')) return '1200-2000';
+  if(p.includes('2000-0400')) return '2000-0400';
+  if(p.includes('0400-1600')) return '0400-1600';
+  if(p.includes('1600-0400')) return '1600-0400';
+  return shiftLabelFor(document.getElementById('shift')?.value) || '';
+}
+function normalizeRosterRow(row){
+  const r={officer:'', post:'', shiftHours:'', attendance:'On-Time', notes:'', ...(row||{})};
+  r.post = normalizePostName(r.post);
+  if(!r.shiftHours) r.shiftHours = postShiftHours(r.post);
+  return r;
+}
+function updateRosterShiftHours(){
+  roster = roster.map(row=>{ const r=normalizeRosterRow(row); r.shiftHours = postShiftHours(r.post); return r; });
+}
+function onRosterPostChange(idx, value){
+  roster[idx].post = normalizePostName(value);
+  roster[idx].shiftHours = postShiftHours(roster[idx].post);
+  renderRoster();
+  saveDraft();
+}
+function applyShiftTimes(force=true){
+  const shift=document.getElementById('shift')?.value;
+  const times=SHIFT_TIMES[shift];
+  if(!times) return;
+  const start=document.getElementById('startTime');
+  const end=document.getElementById('endTime');
+  if(start && (force || !start.value)) start.value=times.start;
+  if(end && (force || !end.value)) end.value=times.end;
+}
+function fillSelect(id, values){ const el=document.getElementById(id); el.innerHTML=values.map(v=>'<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>').join(''); }
+function escapeHtml(s){ return String(s??'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function cloneDefaultPeople(){ return DEFAULT_PEOPLE.map(p=>({...p})); }
+function currentPeopleVersion(){
+  try{ return JSON.parse(localStorage.getItem(PEOPLE_META_KEY)||'{}').bakedVersion || ''; }
+  catch(e){ return ''; }
+}
+function markPeopleVersion(){
+  localStorage.setItem(PEOPLE_META_KEY, JSON.stringify({bakedVersion:BAKED_PEOPLE_VERSION, updatedAt:new Date().toISOString()}));
+}
+function cleanPeople(list){
+  return (Array.isArray(list)?list:[]).map(p=>({name:p.name||'', rank:p.rank||'Security Officer', active:p.active!==false})).filter(p=>p.name.trim()).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function loadPeople(){
+  const storedVersion = currentPeopleVersion();
+  const bakedUpdated = storedVersion !== BAKED_PEOPLE_VERSION;
+  if(bakedUpdated){
+    people = cleanPeople(cloneDefaultPeople());
+    savePeople();
+    markPeopleVersion();
+    setTimeout(()=>toast('People list updated from the rebuilt app file.'), 500);
+    return;
+  }
+  try{
+    const raw=localStorage.getItem(PEOPLE_KEY);
+    people = raw ? cleanPeople(JSON.parse(raw)) : cleanPeople(cloneDefaultPeople());
+  }
+  catch(e){ people = cleanPeople(cloneDefaultPeople()); }
+  if(!Array.isArray(people) || people.length===0){ people = cleanPeople(cloneDefaultPeople()); savePeople(); markPeopleVersion(); }
+}
+function savePeople(){ localStorage.setItem(PEOPLE_KEY, JSON.stringify(people)); markPeopleVersion(); }
+function personLabel(p){ return p.name ? p.name + ' (' + p.rank + ')' : ''; }
+function activePeople(){ return people.filter(p=>p.active && p.name.trim()).sort((a,b)=>a.name.localeCompare(b.name)); }
+function officerOptions(){ return [''].concat(activePeople().map(personLabel)); }
+function supervisorOptions(){ return [''].concat(activePeople().filter(p=>/Supervisor|Manager/i.test(p.rank)).map(personLabel)); }
+function renderSupervisorSelects(){
+  const s1=document.getElementById('supervisor1'), s2=document.getElementById('supervisor2');
+  const old1=s1?s1.value:'', old2=s2?s2.value:'';
+  fillSelect('supervisor1', supervisorOptions()); fillSelect('supervisor2', supervisorOptions());
+  if(s1 && old1 && Array.from(s1.options).some(o=>o.value===old1)) s1.value=old1;
+  if(s2 && old2 && Array.from(s2.options).some(o=>o.value===old2)) s2.value=old2;
+}
+function promoteRank(current){
+  const order=['Security Trainee','Security Officer','Senior Security Officer','Lead Security Officer','Security Supervisor'];
+  const idx=order.indexOf(current);
+  return idx>=0 && idx<order.length-1 ? order[idx+1] : current;
+}
+function openPersonnelManager(){ renderPeopleTable(); document.getElementById('peopleDialog').showModal(); }
+function closePersonnelManager(){ savePeople(); renderSupervisorSelects(); renderRoster(); saveDraft(); document.getElementById('peopleDialog').close(); toast('Personnel list updated.'); }
+function addPersonRow(){ people.push({name:'', rank:'Security Officer', active:true}); renderPeopleTable(); }
+function removePerson(idx){
+  const p=people[idx];
+  if(!p) return;
+  if(!confirm('Remove '+(p.name||'this person')+' from future dropdowns? Existing report rows will not be changed.')) return;
+  p.active=false; savePeople(); renderPeopleTable(); renderSupervisorSelects(); renderRoster();
+}
+function normalizePeopleList(list){
+  return (Array.isArray(list)?list:[])
+    .map(p=>({name:String(p.name||'').trim(), rank:p.rank||'Security Officer', active:p.active!==false}))
+    .filter(p=>p.name)
+    .sort((a,b)=>a.name.localeCompare(b.name));
+}
+function exportPeopleJson(){
+  savePeople();
+  const payload={app:'PWADC Security Shift Report', type:'people-list', version:1, exportedAt:new Date().toISOString(), people:normalizePeopleList(people)};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='PWADC_Shift_Report_People.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('People list exported.');
+}
+function importPeopleJson(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const parsed=JSON.parse(reader.result);
+      const incoming=Array.isArray(parsed) ? parsed : (Array.isArray(parsed.people) ? parsed.people : []);
+      const cleaned=normalizePeopleList(incoming);
+      if(!cleaned.length) throw new Error('No people records found.');
+      if(!confirm('Import '+cleaned.length+' people records and replace this computer\'s current People list?')) return;
+      people=cleaned;
+      savePeople();
+      renderPeopleTable();
+      renderSupervisorSelects();
+      renderRoster();
+      
+      saveDraft();
+      toast('People list imported.');
+    }catch(e){
+      console.warn(e);
+      toast('People import failed. Use a People JSON export from this app.', true);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+function renderPeopleTable(){
+  const body=document.getElementById('peopleBody'); if(!body) return;
+  people.sort((a,b)=>(a.active===b.active?0:(a.active?-1:1)) || a.name.localeCompare(b.name));
+  body.innerHTML='';
+  people.forEach((p,idx)=>{
+    const tr=document.createElement('tr');
+    tr.style.opacity=p.active? '1' : '.45';
+    tr.innerHTML=`<td><input class="form-input" value="${escapeHtml(p.name)}" placeholder="Last, First" oninput="people[${idx}].name=this.value; savePeople()"></td>
+      <td><select onchange="people[${idx}].rank=this.value; savePeople(); renderSupervisorSelects(); renderRoster()">${RANK_OPTIONS.map(r=>`<option ${r===p.rank?'selected':''} value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('')}</select></td>
+      <td><select onchange="people[${idx}].active=this.value==='true'; savePeople(); renderPeopleTable(); renderSupervisorSelects(); renderRoster()"><option value="true" ${p.active?'selected':''}>Active</option><option value="false" ${!p.active?'selected':''}>Inactive</option></select></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="people[${idx}].rank=promoteRank(people[${idx}].rank); savePeople(); renderPeopleTable(); renderSupervisorSelects(); renderRoster()">Promote</button></td>
+      <td><button class="btn btn-danger btn-sm" onclick="removePerson(${idx})">Remove</button></td>`;
+    body.appendChild(tr);
+  });
+  const activeCount=people.filter(p=>p.active).length;
+  const status=document.getElementById('peopleStatus'); if(status) status.textContent=activeCount+' active personnel · '+people.length+' total records';
+}
+function openExportCenter(){ saveDraft(); document.getElementById('exportPreview').innerHTML=buildReportHtml(); document.getElementById('exportDialog').showModal(); }
+
+function toast(msg, isError=false){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show'+(isError?' error':''); setTimeout(()=>t.className='toast'+(isError?' error':''),3200); }
+function init(){
+  loadPeople();
+  fillSelect('shift', SHIFT_OPTIONS); renderSupervisorSelects();
+  loadDraft();
+  if(!document.getElementById('reportDate').value) document.getElementById('reportDate').value=todayISO();
+  if(!document.getElementById('shift').value) document.getElementById('shift').value='1st';
+  refreshReportId();
+  applyShiftTimes(false);
+  if(roster.length===0){ for(let i=0;i<8;i++) addRosterRow(false); }
+  bindAutosave(); renderRoster(); updateStats(); updateRouting();
+}
+function bindAutosave(){
+  FIELDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input', saveDraft); if(el && el.type==='checkbox') el.addEventListener('change', saveDraft); });
+  document.getElementById('reportDate').addEventListener('change', ()=>{ refreshReportId(); saveDraft(); updateStats(); });
+  document.getElementById('shift').addEventListener('change', ()=>{ applyShiftTimes(true); refreshReportId(); updateRosterShiftHours(); renderRoster(); saveDraft(); updateRouting(); updateStats(); });
+}
+function onShiftChange(){ applyShiftTimes(true); refreshReportId(); updateRosterShiftHours(); renderRoster(); saveDraft(); updateRouting(); updateStats(); }
+function getState(){ refreshReportId(); const data={roster}; FIELDS.forEach(id=>{ const el=document.getElementById(id); if(!el) return; data[id] = el.type==='checkbox' ? el.checked : el.value; }); return data; }
+function setState(data){ if(!data) return; FIELDS.forEach(id=>{ const el=document.getElementById(id); if(!el || data[id]===undefined) return; if(el.type==='checkbox') el.checked=!!data[id]; else el.value=data[id]; }); roster = Array.isArray(data.roster) ? data.roster.map(normalizeRosterRow) : []; }
+function saveDraft(){ localStorage.setItem(APP_KEY, JSON.stringify(getState())); document.getElementById('saveIndicator').textContent='Saved '+new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); updateStats(); }
+function loadDraft(){ try{ const raw=localStorage.getItem(APP_KEY); if(raw) setState(JSON.parse(raw)); }catch(e){ console.warn(e); } }
+function openClearFormDialog(){ document.getElementById('clearDialog').showModal(); }
+function clearDraft(){ openClearFormDialog(); }
+function confirmClearForm(){ document.getElementById('clearDialog').close(); doClearForm(); }
+function doClearForm(){ localStorage.removeItem(APP_KEY); roster=[]; FIELDS.forEach(id=>{ const el=document.getElementById(id); if(!el) return; if(el.type==='checkbox') el.checked=false; else el.value=''; }); document.getElementById('reportDate').value=todayISO(); document.getElementById('shift').value='1st'; document.getElementById('confidentiality').value='Internal Use'; document.getElementById('patrolIssues').value='No'; document.getElementById('incidents').value='No'; document.getElementById('fuelLevel').value='Full'; document.getElementById('carDamage').value='None'; document.getElementById('cartBattery').value='Full'; document.getElementById('maintenanceNeeded').value='None'; document.getElementById('cartDamage').value='None'; applyShiftTimes(true); refreshReportId(); for(let i=0;i<8;i++) addRosterRow(false); renderRoster(); saveDraft(); updateRouting(); toast('Form cleared. New blank report ready.'); }
+function addRosterRow(render=true){ roster.push({officer:'', post:'', shiftHours:postShiftHours(''), attendance:'On-Time', notes:''}); if(render) { renderRoster(); saveDraft(); } }
+function removeRosterRow(idx){ roster.splice(idx,1); renderRoster(); saveDraft(); }
+function renderRoster(){ const body=document.getElementById('rosterBody'); body.innerHTML=''; roster=roster.map(normalizeRosterRow); roster.forEach((row,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`
+  <td class="roster-name"><select onchange="roster[${idx}].officer=this.value; saveDraft()">${officerOptions().map(v=>`<option ${v===row.officer?'selected':''} value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('')}</select></td>
+  <td class="post-cell"><select onchange="onRosterPostChange(${idx}, this.value)">${POST_OPTIONS.map(v=>`<option ${v===row.post?'selected':''} value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('')}</select></td>
+  <td class="hours-cell"><input class="form-input" value="${escapeHtml(row.shiftHours)}" oninput="roster[${idx}].shiftHours=this.value; saveDraft()" placeholder="0800-1600"></td>
+  <td class="attendance-cell"><select onchange="roster[${idx}].attendance=this.value; saveDraft()">${ATTENDANCE_OPTIONS.map(v=>`<option ${v===row.attendance?'selected':''} value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('')}</select></td>
+  <td class="notes-cell"><input class="form-input" value="${escapeHtml(row.notes)}" oninput="roster[${idx}].notes=this.value; saveDraft()" placeholder="Notes"></td>
+  <td class="actions-cell"><button class="btn btn-danger btn-sm" onclick="removeRosterRow(${idx})">Remove</button></td>`; body.appendChild(tr); }); updateStats(); }
+function updateStats(){ document.getElementById('statReportId').textContent=document.getElementById('reportId').value||'NEW'; document.getElementById('statShift').textContent=document.getElementById('shift').value||'-'; document.getElementById('statRoster').textContent=roster.filter(r=>r.officer||r.post||r.shiftHours||r.notes).length; }
+function updateRouting(){ const shift=document.getElementById('shift').value; const cc=[JOHN_EMAIL].concat(NEXT_SHIFT_CC[shift]||[]); document.getElementById('routingPill').textContent='To: '+TO_EMAIL+' · CC: '+cc.join(', '); }
+function checked(id){ return document.getElementById(id).checked ? 'Yes' : 'No'; }
+function cleanOfficer(name){ return (name||'').trim(); }
+function notificationSummary(d){
+  const items = [];
+  if(checked('notifyHr')==='Yes') items.push('Human Resources');
+  if(checked('notifyAdmin')==='Yes') items.push('Administration');
+  if(checked('notifyMaint')==='Yes') items.push('Maintenance');
+  if(checked('notifyTrans')==='Yes') items.push('Transportation');
+  if(checked('notifyLaw')==='Yes') items.push('Law Enforcement / EMS');
+  if((d.notifyOther||'').trim()) items.push('Other: '+d.notifyOther.trim());
+  return items.length ? items.join(', ') : 'No notifications selected';
+}
+function rosterEntries(){ return roster.map(normalizeRosterRow).filter(r=>r.officer||r.post||r.shiftHours||r.notes); }
+function buildReportText(){
+  const d=getState(); const cc=[JOHN_EMAIL].concat(NEXT_SHIFT_CC[d.shift]||[]);
+  const entries=rosterEntries();
+  const rosterLines=entries.length ? entries.map((r,i)=>{
+    const num=String(i+1).padStart(2,'0');
+    const officer=(cleanOfficer(r.officer)||'N/A').padEnd(42,' ');
+    const post=(r.post||'N/A').padEnd(18,' ');
+    const hours=(r.shiftHours||postShiftHours(r.post)||'N/A').padEnd(11,' ');
+    const att=(r.attendance||'N/A').padEnd(10,' ');
+    return `${num}  ${officer}  ${post}  ${hours}  ${att}  ${r.notes||''}`;
+  }).join('\n') : 'No roster entries entered.';
+  return `PIGGLY WIGGLY ALABAMA DISTRIBUTING COMPANY
+SECURITY DEPARTMENT SHIFT REPORT
+${'='.repeat(72)}
+
+REPORT CONTROL
+Report ID:       ${d.reportId||'N/A'}
+Report Date:     ${d.reportDate||'N/A'}
+Shift:           ${d.shift||'N/A'} Shift (${shiftLabelFor(d.shift)||`${militaryTime(d.startTime)}-${militaryTime(d.endTime)}`})
+Supervisor:      ${d.supervisor1||'N/A'}
+Additional Sup.: ${d.supervisor2||'N/A'}
+Classification:  ${d.confidentiality||'Internal Use'}
+Submitted:       ${new Date().toLocaleString()}
+
+EMAIL ROUTING
+To:              ${TO_EMAIL}
+CC:              ${cc.join(', ')}
+
+SHIFT SNAPSHOT
+Officers Listed: ${entries.length}
+Incidents:       ${d.incidents||'No'}
+Patrol Issues:   ${d.patrolIssues||'No'}
+Notifications:   ${notificationSummary(d)}
+
+${'-'.repeat(72)}
+OFFICER ROSTER
+${'-'.repeat(72)}
+#   Officer                                     Post              Hours        Status      Notes
+${rosterLines}
+
+${'-'.repeat(72)}
+SHIFT OVERVIEW
+${'-'.repeat(72)}
+${d.overview||'No shift overview entered.'}
+
+${'-'.repeat(72)}
+PATROL / SAFETY
+${'-'.repeat(72)}
+Issues found during patrol: ${d.patrolIssues||'No'}
+Safety / security concerns:
+${d.patrolNotes||'None reported.'}
+
+${'-'.repeat(72)}
+INCIDENTS / EVENTS
+${'-'.repeat(72)}
+Incidents occurred: ${d.incidents||'No'}
+Event ID(s):        ${d.eventIds||'N/A'}
+Agency / Case #:    ${d.agencyCase||'N/A'}
+Details:
+${d.incidentNotes||'None reported.'}
+
+${'-'.repeat(72)}
+PASS-DOWN FOR NEXT SHIFT
+${'-'.repeat(72)}
+${d.passdown||'No pass-down entered.'}
+
+
+${'-'.repeat(72)}
+SECURITY VEHICLE / EQUIPMENT
+${'-'.repeat(72)}
+Security Car Mileage:      ${d.carMileage||'N/A'}
+Fuel Level:                ${d.fuelLevel||'N/A'}
+Security Car Damage:       ${d.carDamage||'None'}
+Security Cart Battery:     ${d.cartBattery||'N/A'}
+Maintenance Needed:        ${d.maintenanceNeeded||'None'}
+Security Cart Damage:      ${d.cartDamage||'None'}
+
+End of report.
+`;
+}
+function buildReportHtml(){
+  const d=getState(); const entries=rosterEntries(); const cc=[JOHN_EMAIL].concat(NEXT_SHIFT_CC[d.shift]||[]);
+ 
+  const rowHtml = entries.length ? entries.map((r,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(cleanOfficer(r.officer)||'N/A')}</td><td>${escapeHtml(r.post||'N/A')}</td><td>${escapeHtml(r.shiftHours||postShiftHours(r.post)||'N/A')}</td><td>${escapeHtml(r.attendance||'N/A')}</td><td>${escapeHtml(r.notes||'')}</td></tr>`).join('') : '<tr><td colspan="6" class="muted">No roster entries entered.</td></tr>';
+  return `<div class="email-preview-card">
+    <div class="email-head"><h2>PWADC Security Department Shift Report</h2><div class="email-sub">Piggly Wiggly Alabama Distributing Company · ${escapeHtml(d.confidentiality||'Internal Use')}</div></div>
+    <div class="email-grid">
+      <div class="email-box"><div class="email-label">Report ID</div><div class="email-value">${escapeHtml(d.reportId||'N/A')}</div></div>
+      <div class="email-box"><div class="email-label">Date</div><div class="email-value">${escapeHtml(d.reportDate||'N/A')}</div></div>
+      <div class="email-box"><div class="email-label">Shift</div><div class="email-value">${escapeHtml(d.shift||'N/A')} · ${escapeHtml(shiftLabelFor(d.shift)||`${militaryTime(d.startTime)}-${militaryTime(d.endTime)}`)}</div></div>
+      <div class="email-box"><div class="email-label">Supervisor</div><div class="email-value">${escapeHtml(d.supervisor1||'N/A')}</div></div>
+      <div class="email-box"><div class="email-label">Officers Listed</div><div class="email-value">${entries.length}</div></div>
+      <div class="email-box"><div class="email-label">Incidents</div><div class="email-value">${escapeHtml(d.incidents||'No')}</div></div>
+      <div class="email-box"><div class="email-label">Patrol Issues</div><div class="email-value">${escapeHtml(d.patrolIssues||'No')}</div></div>
+      <div class="email-box"><div class="email-label">Submitted</div><div class="email-value">${escapeHtml(new Date().toLocaleString())}</div></div>
+    </div>
+    <div class="email-section"><div class="email-section-title">Officer Roster</div><table><thead><tr><th>#</th><th>Officer</th><th>Post</th><th>Shift Hours</th><th>Status</th><th>Notes</th></tr></thead><tbody>${rowHtml}</tbody></table></div>
+    <div class="email-section"><div class="email-section-title">Shift Overview</div><div>${escapeHtml(d.overview||'No shift overview entered.').replace(/\n/g,'<br>')}</div></div>
+    <div class="email-section"><div class="email-section-title">Patrol / Safety</div><div><strong>Issues:</strong> ${escapeHtml(d.patrolIssues||'No')}<br>${escapeHtml(d.patrolNotes||'None reported.').replace(/\n/g,'<br>')}</div></div>
+    <div class="email-section"><div class="email-section-title">Incidents / Events</div><div><strong>Incidents:</strong> ${escapeHtml(d.incidents||'No')}<br><strong>Event ID(s):</strong> ${escapeHtml(d.eventIds||'N/A')}<br><strong>Agency / Case #:</strong> ${escapeHtml(d.agencyCase||'N/A')}<br>${escapeHtml(d.incidentNotes||'None reported.').replace(/\n/g,'<br>')}</div></div>
+    <div class="email-section"><div class="email-section-title">Notifications</div><div>${escapeHtml(notificationSummary(d))}</div></div>
+    <div class="email-section"><div class="email-section-title">Pass-Down For Next Shift</div><div>${escapeHtml(d.passdown||'No pass-down entered.').replace(/\n/g,'<br>')}</div></div>
+    <div class="email-section"><div class="email-section-title">Vehicle / Equipment</div><table><tbody><tr><td><strong>Car Mileage</strong></td><td>${escapeHtml(d.carMileage||'N/A')}</td><td><strong>Fuel</strong></td><td>${escapeHtml(d.fuelLevel||'N/A')}</td></tr><tr><td><strong>Car Damage</strong></td><td>${escapeHtml(d.carDamage||'None')}</td><td><strong>Cart Battery</strong></td><td>${escapeHtml(d.cartBattery||'N/A')}</td></tr><tr><td><strong>Maintenance Needed</strong></td><td>${escapeHtml(d.maintenanceNeeded||'None')}</td><td><strong>Cart Damage</strong></td><td>${escapeHtml(d.cartDamage||'None')}</td></tr></tbody></table></div>
+    <div class="email-section"><div class="email-section-title">Routing</div><div><strong>To:</strong> ${escapeHtml(TO_EMAIL)}<br><strong>CC:</strong> ${escapeHtml(cc.join(', '))}</div></div>
+  </div>`;
+}
+
+function exportFile(filename, mime, content){
+  const blob=new Blob([content],{type:mime});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+function exportFileBaseName(){ const d=getState(); return (d.reportId || reportIdFor(d.reportDate, d.shift)).replace(/[^a-zA-Z0-9_-]/g,'-'); }
+function buildStandaloneReportDocument(){
+  const d=getState();
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(d.reportId||'PWADC Shift Report')}</title>
+  <style>
+    @page{size:letter;margin:.45in}
+    body{font-family:Arial,Helvetica,sans-serif;color:#111827;background:#fff;margin:0;font-size:12px;line-height:1.35}
+    .wrap{max-width:980px;margin:0 auto;padding:0}
+    .masthead{background:#1e2330;color:#fff;border-bottom:5px solid #C0272D;padding:18px 22px;margin-bottom:16px}
+    .brand{font-size:26px;font-weight:800;letter-spacing:1px;color:#C6B273;margin:0;text-transform:uppercase}
+    .sub{font-size:12px;color:#d1d5db;margin-top:4px}
+    .title{font-size:20px;font-weight:800;margin-top:12px;text-transform:uppercase;color:#fff}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .box{border:1px solid #d1d5db;background:#f9fafb;padding:8px;min-height:44px}
+    .label{font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:700;letter-spacing:.6px;margin-bottom:3px}
+    .value{font-size:13px;font-weight:700;color:#111827}
+    .section{border:1px solid #d1d5db;margin:12px 0;break-inside:avoid}
+    .section-title{background:#1e2330;color:#C6B273;font-size:12px;text-transform:uppercase;font-weight:800;letter-spacing:.6px;padding:7px 9px;border-left:5px solid #C0272D}
+    .section-body{padding:9px;white-space:pre-wrap}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    th{background:#1e2330;color:#C6B273;text-align:left;padding:6px;border:1px solid #374151;text-transform:uppercase;font-size:10px;letter-spacing:.4px}
+    td{padding:6px;border:1px solid #d1d5db;vertical-align:top}
+    .muted{color:#6b7280}
+    .footer{font-size:10px;color:#6b7280;margin-top:14px;border-top:1px solid #d1d5db;padding-top:8px}
+    @media print{.no-print{display:none}.wrap{max-width:none}.masthead{print-color-adjust:exact;-webkit-print-color-adjust:exact} th{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+  </style></head><body><div class="wrap">${buildReportHtml().replace('email-preview-card','report-card')}</div></body></html>`;
+}
+function buildExcelWorkbook(){
+  const d=getState(); const entries=rosterEntries();
+  const rows = entries.length ? entries.map((r,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(cleanOfficer(r.officer)||'N/A')}</td><td>${escapeHtml(r.post||'N/A')}</td><td>${escapeHtml(r.shiftHours||postShiftHours(r.post)||'N/A')}</td><td>${escapeHtml(r.attendance||'N/A')}</td><td>${escapeHtml(r.notes||'')}</td></tr>`).join('') : '<tr><td colspan="6">No roster entries entered.</td></tr>';
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,Helvetica,sans-serif} table{border-collapse:collapse;width:100%} th{background:#1e2330;color:#C6B273;font-weight:bold} td,th{border:1px solid #999;padding:6px;vertical-align:top} .section{background:#C0272D;color:#fff;font-weight:bold;text-transform:uppercase}.label{font-weight:bold;background:#f2f2f2;width:180px}
+  </style></head><body>
+  <table><tr><th colspan="6" style="font-size:18px">PWADC Security Department Shift Report</th></tr>
+  <tr><td class="label">Report ID</td><td>${escapeHtml(d.reportId||'N/A')}</td><td class="label">Date</td><td colspan="2">${escapeHtml(d.reportDate||'N/A')}</td></tr>
+  <tr><td class="label">Shift</td><td>${escapeHtml(d.shift||'N/A')} ${escapeHtml(shiftLabelFor(d.shift)||'')}</td><td class="label">Supervisor</td><td colspan="2">${escapeHtml(d.supervisor1||'N/A')}</td></tr>
+  <tr><td class="label">Additional Supervisor</td><td>${escapeHtml(d.supervisor2||'N/A')}</td><td class="label">Confidentiality</td><td colspan="2">${escapeHtml(d.confidentiality||'Internal Use')}</td></tr>
+  <tr><td colspan="5" class="section">Officer Roster</td></tr><tr><th>#</th><th>Officer</th><th>Post</th><th>Shift Hours</th><th>Status</th><th>Notes</th></tr>${rows}
+  <tr><td colspan="5" class="section">Shift Overview</td></tr><tr><td colspan="5">${escapeHtml(d.overview||'No shift overview entered.').replace(/\n/g,'<br>')}</td></tr>
+  <tr><td colspan="5" class="section">Patrol / Safety</td></tr><tr><td class="label">Issues</td><td colspan="4">${escapeHtml(d.patrolIssues||'No')}</td></tr><tr><td class="label">Notes</td><td colspan="4">${escapeHtml(d.patrolNotes||'None reported.').replace(/\n/g,'<br>')}</td></tr>
+  <tr><td colspan="5" class="section">Incidents / Events</td></tr><tr><td class="label">Incidents</td><td>${escapeHtml(d.incidents||'No')}</td><td class="label">Event IDs</td><td colspan="2">${escapeHtml(d.eventIds||'N/A')}</td></tr><tr><td class="label">Agency / Case #</td><td colspan="4">${escapeHtml(d.agencyCase||'N/A')}</td></tr><tr><td class="label">Details</td><td colspan="4">${escapeHtml(d.incidentNotes||'None reported.').replace(/\n/g,'<br>')}</td></tr>
+  <tr><td colspan="5" class="section">Notifications</td></tr><tr><td colspan="5">${escapeHtml(notificationSummary(d))}</td></tr>
+  <tr><td colspan="5" class="section">Pass-Down</td></tr><tr><td colspan="5">${escapeHtml(d.passdown||'No pass-down entered.').replace(/\n/g,'<br>')}</td></tr>
+  <tr><td colspan="5" class="section">Vehicle / Equipment</td></tr><tr><td class="label">Car Mileage</td><td>${escapeHtml(d.carMileage||'N/A')}</td><td class="label">Fuel</td><td colspan="2">${escapeHtml(d.fuelLevel||'N/A')}</td></tr><tr><td class="label">Car Damage</td><td>${escapeHtml(d.carDamage||'None')}</td><td class="label">Cart Battery</td><td colspan="2">${escapeHtml(d.cartBattery||'N/A')}</td></tr><tr><td class="label">Maintenance Needed</td><td>${escapeHtml(d.maintenanceNeeded||'None')}</td><td class="label">Cart Damage</td><td colspan="2">${escapeHtml(d.cartDamage||'None')}</td></tr>
+  </table></body></html>`;
+}
+function pdfSafeText(value){
+  return String(value ?? '')
+    .replace(/[\r\n\t]+/g,' ')
+    .replace(/[–—]/g,'-')
+    .replace(/[“”]/g,'"')
+    .replace(/[‘’]/g,"'")
+    .replace(/[^\x20-\x7E]/g,'');
+}
+function pdfEscape(value){ return pdfSafeText(value).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
+function pdfWrap(text, maxChars){
+  const raw = String(text ?? '').split(/\n/);
+  const lines=[];
+  raw.forEach(part=>{
+    const words=pdfSafeText(part).split(/\s+/).filter(Boolean);
+    if(!words.length){ lines.push(''); return; }
+    let line='';
+    words.forEach(w=>{
+      const next=line ? line+' '+w : w;
+      if(next.length>maxChars && line){ lines.push(line); line=w; }
+      else line=next;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+function buildPdfDocument(){
+  const d=getState();
+  const entries=rosterEntries();
+  const pageW=612, pageH=792, margin=42;
+  let pages=[], ops=[], y=pageH-margin;
+  function push(s){ ops.push(s); }
+  function colorFill(rgb){ push((rgb[0]/255).toFixed(3)+' '+(rgb[1]/255).toFixed(3)+' '+(rgb[2]/255).toFixed(3)+' rg'); }
+  function colorStroke(rgb){ push((rgb[0]/255).toFixed(3)+' '+(rgb[1]/255).toFixed(3)+' '+(rgb[2]/255).toFixed(3)+' RG'); }
+  function rect(x, topY, w, h, rgb){ colorFill(rgb); push(x+' '+(topY-h)+' '+w+' '+h+' re f'); }
+  function line(x1,y1,x2,y2,rgb){ colorStroke(rgb); push('0.8 w '+x1+' '+y1+' m '+x2+' '+y2+' l S'); }
+  function text(t,x,topY,size=10,bold=false,rgb=[17,24,39]){
+    colorFill(rgb);
+    const font=bold?'/F2':'/F1';
+    push('BT '+font+' '+size+' Tf 1 0 0 1 '+x+' '+(topY-size)+' Tm ('+pdfEscape(t)+') Tj ET');
+  }
+  function finishPage(){ pages.push(ops.join('\n')); ops=[]; }
+  function newPage(){ if(ops.length) finishPage(); y=pageH-margin; header(false); }
+  function ensure(space){ if(y-space < margin){ newPage(); } }
+  function header(first){
+    rect(0,pageH,pageW,72,[30,35,48]);
+    rect(0,pageH-67,pageW,5,[192,39,45]);
+    text('PWADC',margin,pageH-18,22,true,[198,178,115]);
+    text('Security Department Shift Report',margin,pageH-43,15,true,[255,255,255]);
+    text((d.reportId||exportFileBaseName()),pageW-250,pageH-22,10,true,[255,255,255]);
+    text((d.confidentiality||'Internal Use'),pageW-250,pageH-42,9,false,[209,213,219]);
+    y=pageH-92;
+  }
+  function section(title){ ensure(26); rect(margin,y,pageW-margin*2,20,[30,35,48]); rect(margin,y,5,20,[192,39,45]); text(title,margin+12,y-4,10,true,[198,178,115]); y-=28; }
+  function keyValue(label,value,x,w){
+    rect(x,y,w,36,[249,250,251]); colorStroke([209,213,219]); push('0.5 w '+x+' '+(y-36)+' '+w+' 36 re S');
+    text(label,x+6,y-6,7,true,[107,114,128]);
+    text(value || 'N/A',x+6,y-19,9,true,[17,24,39]);
+  }
+  function paragraph(value){
+    const lines=pdfWrap(value || 'None reported.', 92);
+    lines.forEach(l=>{ ensure(14); text(l,margin,y,10,false,[17,24,39]); y-=13; });
+    y-=4;
+  }
+  function simpleLine(label,value){ ensure(14); text(label+':',margin,y,9,true,[17,24,39]); text(value||'N/A',margin+130,y,9,false,[17,24,39]); y-=14; }
+
+  header(true);
+  const colW=(pageW-margin*2-18)/4;
+  keyValue('REPORT ID',d.reportId,margin,colW); keyValue('DATE',d.reportDate,margin+colW+6,colW); keyValue('SHIFT',`${d.shift||'N/A'} · ${shiftLabelFor(d.shift)||`${militaryTime(d.startTime)}-${militaryTime(d.endTime)}`}`,margin+(colW+6)*2,colW); keyValue('SUPERVISOR',d.supervisor1,margin+(colW+6)*3,colW);
+  y-=48;
+  keyValue('OFFICERS LISTED',String(entries.length),margin,colW); keyValue('INCIDENTS',d.incidents||'No',margin+colW+6,colW); keyValue('PATROL ISSUES',d.patrolIssues||'No',margin+(colW+6)*2,colW); keyValue('SUBMITTED',new Date().toLocaleString(),margin+(colW+6)*3,colW);
+  y-=54;
+
+  section('Officer Roster');
+  ensure(22);
+  const xs=[margin, margin+24, margin+214, margin+288, margin+356, margin+424];
+  rect(margin,y,pageW-margin*2,18,[30,35,48]);
+  text('#',xs[0]+4,y-4,8,true,[198,178,115]); text('Officer',xs[1]+4,y-4,8,true,[198,178,115]); text('Post',xs[2]+4,y-4,8,true,[198,178,115]); text('Hours',xs[3]+4,y-4,8,true,[198,178,115]); text('Status',xs[4]+4,y-4,8,true,[198,178,115]); text('Notes',xs[5]+4,y-4,8,true,[198,178,115]);
+  y-=20;
+  if(entries.length){
+    entries.forEach((r,i)=>{
+      const notes=pdfWrap(r.notes||'', 25);
+      const rowH=Math.max(18, 14*notes.length+6);
+      ensure(rowH+2);
+      colorStroke([209,213,219]); push('0.5 w '+margin+' '+(y-rowH)+' '+(pageW-margin*2)+' '+rowH+' re S');
+      text(String(i+1),xs[0]+4,y-5,8,false,[17,24,39]);
+      text(cleanOfficer(r.officer)||'N/A',xs[1]+4,y-5,8,false,[17,24,39]);
+      text(r.post||'N/A',xs[2]+4,y-5,8,false,[17,24,39]);
+      text(r.shiftHours||postShiftHours(r.post)||'N/A',xs[3]+4,y-5,8,false,[17,24,39]);
+      text(r.attendance||'N/A',xs[4]+4,y-5,8,false,[17,24,39]);
+      notes.forEach((l,n)=>text(l,xs[5]+4,y-5-(n*12),8,false,[17,24,39]));
+      y-=rowH;
+    });
+  } else { paragraph('No roster entries entered.'); }
+  y-=8;
+
+  section('Shift Overview'); paragraph(d.overview||'No shift overview entered.');
+  section('Patrol / Safety'); simpleLine('Issues found during patrol',d.patrolIssues||'No'); paragraph(d.patrolNotes||'None reported.');
+  section('Incidents / Events'); simpleLine('Incidents occurred',d.incidents||'No'); simpleLine('Event ID(s)',d.eventIds||'N/A'); simpleLine('Agency / Case #',d.agencyCase||'N/A'); paragraph(d.incidentNotes||'None reported.');
+  section('Notifications'); paragraph(notificationSummary(d));
+  section('Pass-Down For Next Shift'); paragraph(d.passdown||'No pass-down entered.');
+  section('Vehicle / Equipment'); simpleLine('Security Car Mileage',d.carMileage||'N/A'); simpleLine('Fuel Level',d.fuelLevel||'N/A'); simpleLine('Security Car Damage',d.carDamage||'None'); simpleLine('Security Cart Battery',d.cartBattery||'N/A'); simpleLine('Maintenance Needed',d.maintenanceNeeded||'None'); simpleLine('Security Cart Damage',d.cartDamage||'None');
+  finishPage();
+
+  const objects=[];
+  function addObj(body){ objects.push(body); return objects.length; }
+  const font1=addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  const font2=addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
+  const pageRefs=[];
+  pages.forEach(content=>{
+    const stream='<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream';
+    const streamId=addObj(stream);
+    const pageId=addObj('');
+    pageRefs.push({pageId,streamId});
+  });
+  const pagesId=objects.length+1;
+  pageRefs.forEach(ref=>{
+    objects[ref.pageId-1]='<< /Type /Page /Parent '+pagesId+' 0 R /MediaBox [0 0 '+pageW+' '+pageH+'] /Resources << /Font << /F1 '+font1+' 0 R /F2 '+font2+' 0 R >> >> /Contents '+ref.streamId+' 0 R >>';
+  });
+  addObj('<< /Type /Pages /Kids ['+pageRefs.map(r=>r.pageId+' 0 R').join(' ')+'] /Count '+pageRefs.length+' >>');
+  const catalogId=addObj('<< /Type /Catalog /Pages '+pagesId+' 0 R >>');
+  let pdf='%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+  const offsets=[0];
+  objects.forEach((body,i)=>{ offsets.push(pdf.length); pdf+=(i+1)+' 0 obj\n'+body+'\nendobj\n'; });
+  const xref=pdf.length;
+  pdf+='xref\n0 '+(objects.length+1)+'\n0000000000 65535 f \n';
+  for(let i=1;i<offsets.length;i++){ pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n'; }
+  pdf+='trailer\n<< /Size '+(objects.length+1)+' /Root '+catalogId+' 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+  return pdf;
+}
+function downloadPdf(){
+  saveDraft();
+  const pdf=buildPdfDocument();
+  exportFile(exportFileBaseName()+'.pdf','application/pdf',pdf);
+  toast('PDF report downloaded. Attach it to the email draft and file it in the correct folder.');
+}
+function openPdfPrint(){ downloadPdf(); }
+function downloadDoc(){ saveDraft(); exportFile(exportFileBaseName()+'.doc','application/msword',buildStandaloneReportDocument()); toast('Word-compatible report downloaded.'); }
+function downloadXls(){ saveDraft(); exportFile(exportFileBaseName()+'.xls','application/vnd.ms-excel',buildExcelWorkbook()); toast('Excel-compatible report downloaded.'); }
+function validateReport(){ const problems=[]; if(!document.getElementById('shift').value) problems.push('Shift is required.'); if(!document.getElementById('supervisor1').value) problems.push('Supervisor is required.'); if(!document.getElementById('startTime').value) problems.push('Start time is required.'); if(!document.getElementById('endTime').value) problems.push('End time is required.'); if(roster.filter(r=>r.officer||r.post).length===0) problems.push('At least one officer roster row should be completed.'); return problems; }
+function buildEmailReminder(d){
+  const fileName=exportFileBaseName();
+  return `Please attach the completed shift report and save a copy in the correct shift report folder before sending.
+
+Report ID / File Name: ${fileName}
+Shift: ${d.shift||'N/A'} Shift (${shiftLabelFor(d.shift)||`${militaryTime(d.startTime)}-${militaryTime(d.endTime)}`})
+Date: ${d.reportDate||'N/A'}`;
+}
+function submitReport(){
+  saveDraft(); const problems=validateReport(); if(problems.length && !confirm('The report has missing items:\n\n'+problems.join('\n')+'\n\nContinue and open email anyway?')) return;
+  const d=getState(); const cc=[JOHN_EMAIL].concat(NEXT_SHIFT_CC[d.shift]||[]); const subject=`${exportFileBaseName()} - Security Shift Report`; const body=buildEmailReminder(d);
+  document.getElementById('statEmail').textContent='Email';
+  const mailto='mailto:'+encodeURIComponent(TO_EMAIL)+'?cc='+encodeURIComponent(cc.join(','))+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  toast('Opening email draft. Attach the saved report before sending.'); window.location.href=mailto;
+}
+async function copyProfessionalEmail(showToast=true){
+  const html=buildReportHtml(); const text=buildReportText();
+  try{
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      await navigator.clipboard.write([new ClipboardItem({'text/html': new Blob([html], {type:'text/html'}), 'text/plain': new Blob([text], {type:'text/plain'})})]);
+      if(showToast) toast('Professional email report copied. Paste into Outlook for the formatted version.');
+      return true;
+    }
+  }catch(e){ console.warn(e); }
+  try{ await navigator.clipboard.writeText(text); if(showToast) toast('Plain-text report copied.'); return true; }catch(e){ console.warn(e); }
+  return false;
+}
+function previewReport(){ document.getElementById('previewText').innerHTML=buildReportHtml(); document.getElementById('previewDialog').showModal(); }
+function copyReport(){ copyProfessionalEmail(true); }
+function downloadTxt(){ const blob=new Blob([buildReportText()],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=exportFileBaseName()+'.txt'; a.click(); URL.revokeObjectURL(a.href); }
+function exportJson(){ const blob=new Blob([JSON.stringify(getState(),null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=exportFileBaseName()+'.json'; a.click(); URL.revokeObjectURL(a.href); }
+function importJson(event){ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ setState(JSON.parse(reader.result)); refreshReportId(); applyShiftTimes(false); renderRoster(); saveDraft(); updateRouting(); toast('Report imported.'); }catch(e){ toast('Import failed. Use a JSON export from this app.', true); } }; reader.readAsText(file); event.target.value=''; }
+init();
+</script>
+</body>
+</html>
